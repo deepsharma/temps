@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="">
+<meta name="author" content="">
+<title>CAPABILITI</title>
+
+<!-- Bootstrap Core CSS -->
+<link href="bower_components/bootstrap/dist/css/bootstrap.min.css" rel="stylesheet">
+
+<!-- MetisMenu CSS -->
+<link href="bower_components/metisMenu/dist/metisMenu.min.css" rel="stylesheet">
+
+<!-- Timeline CSS -->
+<link href="dist/css/timeline.css" rel="stylesheet">
+
+<!-- Custom CSS -->
+<link href="dist/css/sb-admin-2.css" rel="stylesheet">
+<link href="dist/css/custom.css" rel="stylesheet">
+
+<!-- jquery ui -->
+<link href="dist/css/jquery-ui.min.css" rel="stylesheet">
+
+<!-- jquery upload -->
+<link href="dist/css/jquery.filer.css" type="text/css" rel="stylesheet" />
+<link href="dist/css/jquery.filer-dragdropbox-theme.css" type="text/css" rel="stylesheet" />
+
+<!-- Custom Fonts -->
+<link href="http://fortawesome.github.io/Font-Awesome/assets/font-awesome/css/font-awesome.css" rel="stylesheet" type="text/css">
+<!--<link href="bower_components/font-awesome/css/font-awesome.css" rel="stylesheet" type="text/css"> -->
+<link href="bower_components/metisMenu/dist/metisMenu.min.css" rel="stylesheet" type="text/css">
+<link href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:600,400" rel="stylesheet" type="text/css">
+
+<!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+<!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+<!--[if lt IE 9]>
+        <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+        <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
+
+</head>
+
+<body>
+<div id="wrapper">
+
+<!-- Navigation -->
+<nav class="navbar navbar-default navbar-static-top" role="navigation" style="margin-bottom: 0" id="top-nav">
+  <div class="navbar-header">
+    <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse"> <span class="sr-only">Toggle navigation</span> <span class="icon-bar"></span> <span class="icon-bar"></span> <span class="icon-bar"></span> </button>
+    <a class="navbar-brand" href="index.html">CAPABILITI</a> </div>
+  <!-- /.navbar-header -->
+  
+  <ul class="nav navbar-top-links navbar-right">
+	  <button class="btn btn-primary btn-lg  btn-logout btn-extention" type="submit"><i class="fa fa-chrome"></i> Get extension</button>
+	  <button class="btn btn-primary btn-lg  btn-logout" type="submit"><i class="fa fa-sign-out fa-fw"></i> Logout</button>
+  </ul>
+  <!-- /.navbar-top-links -->
+  
+  <div class="navbar-default sidebar" role="navigation" id="lsb-tree">
+    <div class="sidebar-nav navbar-collapse">
+      <ul class="nav" id="side-menu">
+        <li class="sidebar-title">
+          <h3><i class="fa fa-database"></i> Index</h3>
+        </li>
+        <li class="nav nav-sidebar course-action">
+		<a href="#" class="add-mod" title="Create Module"><i class="fa fa-folder-open"></i></a>
+		<a href="#" class="add-sub-mod" title="Create Sub Module"><i class="fa fa-file-text"></i></a>
+		<a href="#" title="Delete Module"><i class="fa fa-trash"></i></a>
+		</li>
+		<div id="no-module" class="text-center">
+		<h3 class="index-pane-title">This is your Index Pane</h3>
+		<p class="index-pane">All your Modules and lessons appear here.</p>
+		</div>
+      </ul>
+    </div>
+    <!-- /.sidebar-collapse --> 
+  </div>
+  <!-- /.navbar-static-side --> 
+</nav>
+<div id="page-wrapper">
+  <div class="row pad-zero boxes">
+    <div class="col-lg-7 pad-zero">
+      <div class="panel panel-default border-zero">
+        <div class="panel-heading sidebar-title">
+          <h3><i class="fa fa-pencil-square-o"></i> Creator</h3>
+        </div>
+        <!-- /.panel-heading -->
+		<div id="main-container" class="row pad-zero">
+			<div class="panel-body center-pan text-center">
+			  <h1 class="mr-top-90">Hi! Start by adding a new Module.<br> It will appear in the left pane.</h1>
+			   <button type="button" class="btn btn-primary btn-lg add-nm add-mod">Add new module</button>
+			</div>
+		</div>
+		<!-- /.panel-body -->
+      </div>
+      <!-- /.panel --> 
+    </div>
+    <!-- /.col-lg-8 -->
+    <div class="col-lg-5 pad-zero" id="library">
+      <div class="panel panel-default border-zero">
+        <div class="panel-heading sidebar-title">
+          <h3><i class="fa fa-picture-o"></i> Media</h3>
+        </div>
+        <!-- /.panel-heading -->
+        <div class="panel-body">
+          <div class="row sidebar-search border-bot-1 pad-zero">
+            <div class="input-group custom-search-form search-shell col-xs-8 ">
+              <input type="text" class="form-control search" placeholder="Type to Search...">
+              <span class="input-group-btn">
+              <button class="btn btn-default" type="button"> <i class="fa fa-search"></i> </button>
+              </span> </div>
+            <!-- /input-group -->
+            <div class="col-xs-4 lib-action pad-zero">
+			  <span class="list-tile-btn">
+				<button class="btn btn-default" type="button"> <i class="fa fa-th-large"></i> </button>
+              </span>
+			  <span class="upload-btn">
+				<button class="btn btn-default" type="button"> <i class="fa fa-cloud-upload"></i> </button>
+              </span>
+              <div class="pull-right">
+                <div class="btn-group">
+                  <button type="button" class="btn btn-default btn-xs dropdown-toggle" data-toggle="dropdown"> <i class="fa fa-filter"></i><i class="caret"></i> </button>
+                  <ul class="dropdown-menu pull-right" role="menu">
+                    <li><a href="#"><i class="fa fa-file-pdf-o"></i> PDF</a> </li>
+                    <li class="divider"></li>
+                    <li><a href="#"><i class="fa fa-file-video-o"></i> Video</a> </li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+		  
+		  <div id="media-loader" class="row text-center">
+			  <div class="loader-shell" type="submit">
+				<!--<div class="progress"></div>-->
+				<div class="spinner">
+				  <div class="ball"></div>
+				  <p>Files uploading is in process</p>
+				</div>
+			  </div>
+		  </div>
+		  <!-- initial dropzone
+		   #dropzone -->
+		  <div id="dropzone" class="row lib-articles text-center" style="display:block;">
+			 <input type="file" name="userMedia[]" id="filer_input" multiple="multiple">
+		  </div>
+		   <!-- / #dropzone
+		   initial dropzone -->
+		   
+		  <!-- #mediaContainer -->
+          <div id="mediaContainer" class="row lib-articles" style="display:none;">
+            <div id="gridView">
+				<div class="col-sm-6 col-md-3">
+				  <div class="thumbnail text-center">
+					<span class="jFiler-icon-file f-video item" data-type="video" data-artifact="00001" data-name="video.mp4"><i class="fa fa-file-video-o"></i></span>
+					<div class="caption">
+					  <h5>in the woods.jpg</h5>
+					  <p>Jul 22, 110,2 KB</p>
+					</div>
+				  </div>
+				</div>
+				<div class="col-sm-6 col-md-3">
+				  <div class="thumbnail text-center">
+					<span class="jFiler-icon-file f-file f-file-ext-pdf item" data-type="pdf" data-artifact="00002" data-name="my-document.pdf"><i class="fa fa-file-pdf-o"></i></span>
+					<div class="caption">
+					  <h5>in the woods.jpg</h5>
+					  <p>Jul 22, 110,2 KB</p>
+					</div>
+				  </div>
+				</div>
+				<div class="col-sm-6 col-md-3">
+				  <div class="thumbnail text-center">
+					<span class="jFiler-icon-file f-video item" data-type="video" data-artifact="00003" data-name="video.mp4"><i class="fa fa-file-video-o"></i></span>
+					<div class="caption">
+					  <h5>in the woods.jpg</h5>
+					  <p>Jul 22, 110,2 KB</p>
+					</div>
+				  </div>
+				</div>
+			</div>
+		   <!-- /#gridView -->
+           </div><!-- /#mediaContainer -->
+		   
+		   
+          </div>
+        </div>
+        <!-- /.panel-body --> 
+      </div>
+      <!-- /.panel --> 
+      <!-- /.col-lg-4 --> 
+    </div>
+    <!-- /.row --> 
+  </div>
+  <!-- /#page-wrapper --> 
+  
+</div>
+
+</div>
+<!-- /#wrapper -->
+
+<!-- dynamic form element -->
+<div id="moduleForm"></div>
+
+<!-- jQuery --> 
+<script src="bower_components/jquery/dist/jquery.min.js"></script> 
+
+<!-- jquery ui -->
+<script src="js/jquery-ui.min.js"></script>
+
+<!-- Bootstrap Core JavaScript --> 
+<script src="bower_components/bootstrap/dist/js/bootstrap.min.js"></script> 
+
+<!-- Metis Menu Plugin JavaScript --> 
+<script src="bower_components/metisMenu/dist/metisMenu.min.js"></script> 
+
+<!-- jQuery upload -->
+<script type="text/javascript" src="js/jquery.filer.min.js"></script>
+<script type="text/javascript" src="js/filer.js"></script>
+
+<!-- Custom Theme JavaScript --> 
+<script src="dist/js/sb-admin-2.js"></script>
+
+<!-- custom jQuery --> 
+<script src="js/script.js"></script> 
+
+<!-- Custom Scrollbars JavaScript --> 
+<!--<script>
+		$("#lib-files, #center-pan").addClass("thin");
+		// If user has Javascript disabled, the thick scrollbar is shown
+		$("#lib-files, #center-pan").mouseover(function(){
+		  $(this).removeClass("thin");
+		});
+		$("#lib-files, #center-pan").mouseout(function(){
+		  $(this).addClass("thin");
+		});
+		$("#lib-files, #center-pan").scroll(function () {
+		  $("#lib-files, #center-pan").addClass("thin");
+		});
+</script>   -->
+</body>
+</html>

@@ -1,0 +1,176 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>Walkthrough</title>
+<style>
+body{
+margin:0;
+padding:0;
+}
+#wrapper, #myvideo{
+	height:auto;
+	width:100%;
+}
+</style>
+<script type="text/javascript" src="js/jquery.js"></script>
+</head>
+<!--
+walkthrough are named as :
+1.mp4, 2.mp4, 3.mp4, 4.mp4 upto last walkthrough and contains a unique folder name 
+-->
+<body>
+<div id="wrapper">
+	<div>
+		<video id="myvideo" autoplay="true" controls>
+		   <source src="" type="video/mp4" />
+		   Your browser does not support the video element.
+		</video>
+	</div>
+</div>
+<script>
+var user_id = getQueryVariable('user_id');
+var enterprise_id = getQueryVariable('enterprise_id');
+var artifact_type =  getQueryVariable('artifact_type');
+var video_dir = getQueryVariable('video_dir');
+var dir = 'walkthrough/'+video_dir;
+var video_name = getQueryVariable('video_name').replace('.mp4','').slice(-1);;
+var total_video = getQueryVariable('total_video');
+var artifact_id = getQueryVariable('artifact_id');
+var play_type = getQueryVariable('play_type');
+var v = document.getElementById('myvideo');
+var logData = "";
+var randomNo = "";
+
+$(document).ready(function(){
+	$('#myvideo source').attr('src', video_dir+'/'+video_dir+'_1.mp4');
+	createJson("start",0,0);
+	video_play(play_type);
+	randomNo = generateRandomNo();
+	myInterval = setInterval(function(){
+		x = $('#wrapper').find('video').get(0).currentTime;
+		var y = $('#wrapper').find('video').get(0).duration;
+		createJson("progress",x,y);
+		if(x==y){
+			createJson("stop",x,y);
+			video_finish();
+			clearInterval(myInterval);
+		}
+	},5000);
+});
+
+function video_finish() {
+	//Call an event to the parent window for video finish..
+	//1.video name, 2.step, 3. video directory, 4. total no. of videos, 5. artifact id.
+	if(self != top) parent.postMessage(video_name+'.mp4'+'^'+'Step 0'+video_name+'^'+video_dir+'^'+total_video+'^'+artifact_id+'^Completed','*');
+}
+
+function video_play (type) {
+	// Execute the appropriate function...
+	switch(type) {
+		case 'previous':
+			previous();
+			break;
+		case 'next':
+			next();
+			break;
+		case 'replay':
+			replay();
+			break;
+		default:
+			console.log('Video Play Switch default loop, Do Nothing!!');
+	}
+}
+
+function next () {
+	switch(video_dir) {
+		case video_dir:
+			if(video_name == total_video){
+				//do nothing
+			}else{
+				video_name++;
+			}
+			break;
+		default:
+			console.log('Next Switch default loop, Do Nothing!!');
+	}
+	var new_video = dir+'/'+video_dir+'_'+video_name+'.mp4';
+	console.log(new_video);
+	v.src = new_video;
+}
+
+function previous () {
+	if(video_name == 1) {
+		//do nothing
+	}
+	else {
+		//console.log('Previous');
+		video_name--;
+	}
+	var new_video = dir+'/'+video_dir+'_'+video_name+'.mp4';
+	console.log(new_video);
+	v.src = new_video;
+}
+
+function replay () {
+	//console.log('Replay');
+	var new_video = dir+'/'+video_dir+'_'+video_name+'.mp4';
+	console.log(new_video); 
+	v.src = new_video;
+}
+function createJson(a,b,c){
+	var obj = new Object();
+	obj.userID = user_id;
+	obj.enterpriseID = enterprise_id;
+	obj.elementType = artifact_type;
+	obj.elementID = artifact_id;
+	obj.datetime  = getDateTime();
+	obj.status  = a;
+	obj.elapsetime = b;
+	obj.totaltime = c;
+	obj.randomID = randomNo;
+	jsonString= JSON.stringify(obj);
+	logData+=jsonString+'\r\n';
+}
+function getDateTime(){
+	return new Date().getTime();
+}
+function generateRandomNo(){
+	return Math.floor(Math.random() * 900000) + 100000;
+	// 6 digit random no.
+}
+function getQueryVariable(variable) {
+  var query = window.location.search.substring(1);
+  query = decodeURIComponent(query);
+  var vars = query.split("&");
+  for (var i=0;i<vars.length;i++) {
+    var pair = vars[i].split("=");
+    if (pair[0] == variable) {
+      return pair[1];
+    }
+  } 
+  //not found
+}
+/*******    AJAX request for reporting    *******/
+var tempQdata = "";
+setInterval(function(){
+	tempQdata += logData;
+	if(tempQdata != ''){
+		logData = '';
+		$.ajax({
+					url: "http://stage1.qustn.com/dev/report/api/getvideo.php",
+					type: 'POST',
+					data: {data:tempQdata, enterprise:enterprise_id},
+					success: function (result) {
+						console.log(result);
+						tempQdata = "";
+					},
+					error:function(error){
+						console.log(error);
+					}
+				});
+	}
+},60000);
+</script>
+</body>
+</html>

@@ -1,0 +1,102 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>Video</title>
+<style>
+#wrapper, #myvideo{
+	height:auto;
+	width:100%;
+}
+</style>
+<script type="text/javascript" src="js/jquery.js"></script>
+</head>
+<body>
+<div id="wrapper"> 			
+		<video id="myvideo" controls>
+		   <source src="" type="video/mp4" />
+		   Your browser does not support the video element.
+		</video>
+</div>
+<script>
+var user_id = getQueryVariable('user_id');
+var enterprise_id = getQueryVariable('enterprise_id');
+var artifact_type =  getQueryVariable('artifact_type');
+var artifact_id =  getQueryVariable('artifact_id');
+var src =  getQueryVariable('src');
+var logData = "";
+var randomNo = "";
+$(document).ready(function(){
+	$('#myvideo source').attr("src", src);
+	randomNo = generateRandomNo();
+	createJson("start",0,0);
+	$(function(){
+		$('#wrapper').find('video').get(0).load();
+		$('#wrapper').find('video').get(0).play();
+	});
+	myInterval = setInterval(function(){
+		x = $('#wrapper').find('video').get(0).currentTime;
+		var y = $('#wrapper').find('video').get(0).duration;
+		createJson("progress",x,y);
+		if(x==y){
+			createJson("stop",x,y);
+			clearInterval(myInterval);
+		}
+	},5000);
+});
+function createJson(a,b,c){
+	var obj = new Object();
+	obj.userID = user_id;
+	obj.enterpriseID = enterprise_id;
+	obj.elementType = artifact_type;
+	obj.elementID = artifact_id;
+	obj.datetime  = getDateTime();
+	obj.status  = a;
+	obj.elapsetime = b;
+	obj.totaltime = c;
+	obj.randomID = randomNo;
+	jsonString= JSON.stringify(obj);
+	logData+=jsonString+'\r\n';
+}
+function getDateTime(){
+	return new Date().getTime();
+}
+function generateRandomNo(){
+	return Math.floor(Math.random() * 900000) + 100000;
+	// 6 digit random no.
+}
+function getQueryVariable(variable) {
+  var query = window.location.search.substring(1);
+  query = decodeURIComponent(query);
+  var vars = query.split("&");
+  for (var i=0;i<vars.length;i++) {
+    var pair = vars[i].split("=");
+    if (pair[0] == variable) {
+      return pair[1];
+    }
+  } 
+  //not found
+}
+/*******    AJAX request for reporting    *******/
+var tempQdata = "";
+setInterval(function(){
+	tempQdata += logData;
+	if(tempQdata != ''){
+		logData = '';
+		$.ajax({
+					url: "http://stage1.qustn.com/dev/report/api/getvideo.php",
+					type: 'POST',
+					data: {data:tempQdata, enterprise:enterprise_id},
+					success: function (result) {
+						console.log(result);
+						tempQdata = "";
+					},
+					error:function(error){
+						console.log(error);
+					}
+				});
+	}
+},60000);
+</script>
+</body>
+</html>

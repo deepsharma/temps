@@ -1,0 +1,40 @@
+callback({
+    "view": {
+        "video": {
+            "icon": "img/icon-video.png",
+            "tooltiptext": "Training Video"
+        },
+        "pdf": {
+            "icon": "img/icon-document.png",
+            "tooltiptext": "Pdf document"
+        },
+        "walkthrough": {
+            "icon": "img/icon-walkthrough.png",
+            "tooltiptext": "Walk Through"
+        },
+        "simulation": {
+            "icon": "img/icon-simulation.png",
+            "tooltiptext": "Simulation"
+        },
+        "qcourse": {
+            "icon": "img/icon-document.png",
+            "tooltiptext": "Qustn Course"
+        },
+        "externallink": {
+            "icon": "img/icon-video.png",
+            "tooltiptext": "External Resource Link"
+        },
+        "externalvideo": {
+            "icon": "img/icon-sound.png",
+            "tooltiptext": "External Video Link"
+        },
+        "iconbullet": {
+            "icon": "img/blue-bullet.png",
+            "tooltiptext": ""
+        },
+        "iconList": {
+            "icon": "img/icon-list.png",
+            "tooltiptext": ""
+        }
+    }
+});

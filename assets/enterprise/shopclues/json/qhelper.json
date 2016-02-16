@@ -1,0 +1,34 @@
+callback({
+    "version": "1",
+    "attributes": {
+        "type": "title",
+		"image": "img/fab-icon.png",
+        "radius": "50%",
+		"shadow": "none",
+        "bgcolor": "",
+        "color": ""
+    },
+    "properties": [
+        {
+            "property": {
+                "title": "Search Help",
+                "image": "img/spotligh-search.png",
+                "id": "001",
+				"shadow": "none",
+                "bgcolor": "#486c8f",
+                "color": "#FFFFFF"
+            }
+        },
+        {
+            "property": {
+                "title": "Browse Help",
+                "image": "img/search.png",
+                "id": "002",
+				"shadow": "none",
+                "bgcolor": "#486c8f",
+                "color": "#FFFFFF"
+            }
+        }
+    ]
+}
+);
