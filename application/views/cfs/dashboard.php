@@ -1,3 +1,4 @@
+<body>
 <!----LOADER---->
 <!--<div class="spinner-page"><img src="assets/images/logo-gray.png" alt=""></div>-->
 <div id="loader">
@@ -351,7 +352,7 @@
 		  <!-- initial dropzone
 		   #dropzone -->
 		  <div id="dropzone" class="row lib-articles text-center" style="<?php  if(!empty($allMedia) && !empty((array)$allMedia->artifacts)){ echo 'display:none'; }else{ echo 'display:block';} ?>">
-			 <input type="file" name="userMedia[]" id="filer_input" multiple="multiple">
+			 <input type="file" name="userMedia[]" id="filer_input" multiple="multiple" accept=".pdf,.mkv,.avi,.flv,.mp4,.3gp,.wmv,.pdf,.mov,.mpeg,.mpg">
 		  </div>
 		   <!-- / #dropzone
 		   initial dropzone -->
@@ -365,10 +366,26 @@
 				//echo "<pre>";print_r($allMedia);die;
 				foreach($allMedia->artifacts as $mediakey=> $mediaData)
 				{
-					
+							$unprocessed=0;
+							if($mediaData->type=='video' && $mediaData->path)
+							{
+								$cur_enterprise=explode('.',$mediaData->path);
+								$cur_videofile=$cur_enterprise[0];
+								$unprocessed=(in_array($cur_videofile,$unprocessedMedia))?1:0;
+							} // check unprocessed videos
 				?>
 					<div class="col-sm-6 col-md-3 media-elm"  title="<?php echo $mediaData->title;?>">
-					  <button type="button" class="delete-media btn-delete btn btn-danger btn-circle" data-artifact="<?php echo $mediakey;?>"><i class="fa fa-times"></i></button>
+						<?php if($mediaData->type=='video' && $unprocessed)
+							{
+							?>
+							<div class="thumb-progress"><div class="thumb-progress-striped"></div></div>
+							<?php								
+							}else{
+								?>
+								<button type="button" class="delete-media btn-delete btn btn-danger btn-circle" data-artifact="<?php echo $mediakey;?>"><i class="fa fa-times"></i></button>
+								<?php
+							} ?>
+					 
 					  <div class="thumbnail text-center" id="artifact-<?php echo $mediakey;?>" >						
 						<?php
 						if($mediaData->type=='pdf')
@@ -378,9 +395,10 @@
 						<?php						
 						}else if($mediaData->type=='video')
 						{
+									
 							?>
 							<span class="item" data-type="video" data-artifact="<?php echo $mediakey;?>" data-name="<?php echo $mediaData->title;?>" data-size="<?php echo isset($mediaData->size)?$mediaData->size:'';?>" data-time="<?php echo date('M d',isset($mediaData->createdTime)?$mediaData->createdTime:time());?>" data-tags="<?php echo isset($mediaData->tags)?$mediaData->tags:'';?>">
-							<img src="<?php echo base_url();?>assets/web_assets/dist/img/mp4.png"></span>
+							<img  src="<?php echo base_url();?>assets/web_assets/dist/img/mp4.png"></span>
 							<?php
 						}
 						?>
@@ -460,5 +478,4 @@
 
 <!-- dynamic form element -->
 <div id="moduleForm"></div>
-
 <?php $this->load->view('layout/footer');?>

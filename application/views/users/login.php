@@ -8,6 +8,7 @@
                     <div class="panel-body">
                         <form class="cmxform" id="signupForm" method="post" action="<?php echo base_url();?>users/login" autocomplete="off" >
                             <fieldset>
+							<?php echo $this->session->flashdata('flashData');?>
                                 <div class="form-group">
                                     <input class="form-control" placeholder="E-mail*" name="email" id="email" type="email" value="<?php echo (isset($_COOKIE['username']) && $_COOKIE['username'] != '') ? trim($_COOKIE['username']) : ''; ?>" autofocus>  
 									<?php echo form_error('email', '<div class="error-aleart">', '</div>'); ?>

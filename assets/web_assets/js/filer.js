@@ -4,7 +4,7 @@ $(document).ready(function() {
         limit: null,
         maxSize: null,
         extensions: null,
-        changeInput: '<div class="jFiler-input-dragDrop"><div class="jFiler-input-inner"><h3></h3><p>Drag files from your computer and drop here.</p><div class="jFiler-input-icon"><i class="icon-jfi-cloud-up-o"></i></div><div class="jFiler-input-text"><span style="display:inline-block; margin-bottom: 20px;">or</span></div><a class="jFiler-input-choose-btn blue">Browse Files</a></div></div>',
+        changeInput: '<div class="jFiler-input-dragDrop"><div class="jFiler-input-inner"><h3 style="margin-top:120px;"></h3><p>Drag pdf or mp4 files from your computer and drop here.</p><div class="jFiler-input-icon"><i class="icon-jfi-cloud-up-o"></i></div><div class="jFiler-input-text"><span style="display:inline-block; margin-bottom: 20px;">or</span></div><a class="jFiler-input-choose-btn blue">Browse Files</a></div></div>',
         showThumbs: true,
         theme: "dragdropbox",
 		appendTo: "#filerContainer",
@@ -80,6 +80,7 @@ $(document).ready(function() {
 				result = JSON.parse(data);
 				artifactId = result.response.detail.id;
 				artifactName = result.response.detail.title;
+				artifactPath = result.response.detail.path;
 				artifactTemp = artifactName.substr(0,13);
 				artifactTemp = artifactTemp+'...';
 				artifactType = result.response.detail.type;
@@ -87,11 +88,11 @@ $(document).ready(function() {
 				artifactSize = result.response.detail.size;	
 				artifactTags = result.response.detail.tags;
 				artifactIcon = (artifactType == "pdf")?"pdf.png":"mp4.png";
+				dragClass = (artifactType == "pdf")?"item":"";
+				artifactProcess = (artifactType == "pdf")?'<button type="button" class="delete-media btn-delete btn btn-danger btn-circle" data-artifact="'+artifactId+'"><i class="fa fa-times"></i></button>':'<div class="thumb-progress"><div class="thumb-progress-striped"></div></div>';
 				if(result.response.status == "1"){
-					$('#gridView').append('<div class="media-elm col-sm-6 col-md-3" title="'+artifactName+'">\
-					<button type="button" class="delete-media btn-delete btn btn-danger btn-circle" data-artifact="'+artifactId+'"><i class="fa fa-times"></i></button>\
-					  <div class="thumbnail text-center">\
-						<span class="item" data-type="'+artifactType+'" data-artifact="'+artifactId+'" data-name="'+artifactName+'" data-size="'+artifactSize+'" data-time="'+artifactUploadTime+'" data-tags="'+artifactTags+'"><img src="'+baseImage+artifactIcon+'" /></span>\
+					$('#gridView').append('<div class="media-elm col-sm-6 col-md-3" title="'+artifactName+'">'+artifactProcess+'<div class="thumbnail text-center">\
+					  <span class="'+dragClass+'" data-process="false" data-type="'+artifactType+'" data-artifact="'+artifactId+'" data-name="'+artifactName+'" data-path="'+artifactPath+'" data-size="'+artifactSize+'" data-time="'+artifactUploadTime+'" data-tags="'+artifactTags+'"><img src="'+baseImage+artifactIcon+'" /></span>\
 						<div class="caption">\
 						  <h5>'+artifactTemp+'</h5>\
 						  <!--<p>'+artifactUploadTime+' , '+artifactSize+'</p>-->\
@@ -110,7 +111,13 @@ $(document).ready(function() {
 						scroll: false,
 					});
 				}else{
-					alert("Failed to upload - "+artifactName);
+					//alert("Failed to upload - "+artifactName);
+					swal({
+						title: "",
+						text: 'Failed to upload - '+artifactName+'.',
+						closeOnConfirm: false,
+						animation: "slide-from-top"
+					});
 					failedFiles += artifactName+"\n";
 				}
             },

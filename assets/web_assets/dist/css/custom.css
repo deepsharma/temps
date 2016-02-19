@@ -69,8 +69,8 @@ span.jFiler-icon-file{
 }
 .btn-delete{
 	position:absolute;
-	top:-15px;
-	right:10px;
+	top:-5px;
+	right:25px;
 	z-index:10;
     width: 20px;
     height: 20px;
@@ -82,8 +82,8 @@ position:relative;
 }
 .remove-media{
     position: absolute;
-    top: 0;
-    right: 0;
+    top: 0px;
+    right: 15px;
     width: 20px;
     height: 20px;
 	font-size: 10px;
@@ -370,4 +370,40 @@ a[id^="moduleHead"]:focus{
   /* remove webkit p margins */
   -webkit-margin-before: 0em;
   -webkit-margin-after: 0em;
+}
+.thumb-progress {
+    position: absolute;
+    top: 52%;
+    left: 0;
+	right: 0;
+	margin: auto;
+    height: 10px;
+    width: 49px;
+	z-index: 100;
+}
+/** thumb-progress bar **/
+.thumb-progress-striped {
+  width: 100%;
+  height: 8px;
+  border: 0px solid #f7f7f7;
+  border-radius: 0px;
+  background-image: 
+    repeating-linear-gradient(
+      -45deg,
+      #CCC,
+      #CCC 6px,
+      #f7f7f7 5px,
+      #f7f7f7 10px /* determines size */
+    );
+  background-size: 28px 28px;
+  animation: move .9s linear infinite;
+}
+
+@keyframes move {
+  0% {
+    background-position: 0 0;
+  }
+  100% {
+    background-position: 28px 0;
+  }
 }

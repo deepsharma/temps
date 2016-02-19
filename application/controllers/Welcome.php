@@ -29,6 +29,7 @@ class Welcome extends CI_Controller {
 		
 		$data['allMedia']=$this->getAllMedia();
 		$data['allModules']=$this->getAllModules();
+		$data['unprocessedMedia']=$this->getUnprocessedMedia($this->enterprise);
 		$data['pagename']='dashboard';
 		$this->layout->view('cfs/dashboard',$data);
 		
@@ -60,8 +61,56 @@ class Welcome extends CI_Controller {
 		return array();
 	}
 	
+	public function getUnprocessedMedia()
+	{
+		$dir = FCPATH.'assets/unprocessed/';
+		$arr=array();
+		if (is_dir($dir)){
+		  if ($dh = opendir($dir)){
+			while (($file = readdir($dh)) !== false ){
+				if($file!=='.' && $file!='..')
+				{
+					if(!empty($file))
+					{
+						$enterprise=explode('_',$file);
+						//print_r($file);die;
+						$enterpreiseName=@$enterprise[0];
+					    $videofile=@$enterprise[1];
+						if($this->enterprise==$enterpreiseName)
+						{
+							$ent_file=explode('.',$videofile);
+							$arr[]=@$ent_file[0];
+						}					
+												
+					}
+				}
+			  
+			}
+			closedir($dh);
+		  }
+		}
+		return $arr;
+	}
 	
-	
+	public function getUnprocessedMediaByAjax()
+	{
+		$result_array=$this->getUnprocessedMedia();
+		if(!empty($result_array))
+		{
+			$result['msg']='success';
+			$result['status']="1";
+			$result['detail']=$result_array;
+			$returnData['response']=$result;
+			die(json_encode($returnData));
+		}else{
+			$result['msg']='No media found';
+			$result['status']="0";
+			$result['detail']=array();
+			$returnData['response']=$result;
+			die(json_encode($returnData));
+		}
+		
+	}
 	
 	
 }

@@ -528,8 +528,8 @@ private function set_upload_options($filename,$ext)
 		//$config['upload_path'] = './assets/enterprise/'.$this->enterprise.'/video/';
 		$config['upload_path'] = './assets/unprocessed/';
 	}
-    //$config['allowed_types'] = 'mkv|avi|flv|mp4|3gp|wmv|pdf|mov|mpeg|mpg';
-    $config['allowed_types'] = 'mp4|pdf';
+    $config['allowed_types'] = 'mkv|avi|flv|mp4|3gp|wmv|pdf|mov|mpeg|mpg';
+    //$config['allowed_types'] = 'mp4|pdf';
     $config['overwrite']     = FALSE;
 	$config['file_name'] = $filename;
     return $config;
@@ -911,6 +911,9 @@ private function set_upload_options($filename,$ext)
 	function moveProcessdVideo()
 	{
 		
+		$success=0;
+		$uploadedfile='';
+		$flag=0;
 		$dir = FCPATH.'assets/processed/';
 		if (is_dir($dir)){
 		  if ($dh = opendir($dir)){
@@ -919,26 +922,45 @@ private function set_upload_options($filename,$ext)
 				{
 					if(!empty($file))
 					{
-						$enterprise=explode('_',$file);
-						$enterpreiseName=$enterprise[0];
-						$videofile=$enterprise[1];						
-						$myfile = $dir.$file;
-						$newfile = FCPATH.'assets/enterprise/'.$enterpreiseName.'/video/'.$videofile;
-							if (!is_dir(APPPATH  . "/logs/videoprocess/"))
+						$movedfiles=APPPATH  . "/logs/videoprocess/processed.php";
+						if(file_exists($movedfiles))
+						{
+							$filecontent=file_get_contents($movedfiles);
+							if($filecontent)
 							{
-								@mkdir(APPPATH  . "/logs/videoprocess",0777);
+								$processedArray=explode(',',rtrim($filecontent,','));
+								if(in_array($file,$processedArray))
+								{
+									$flag=1;
+								}
 							}
-							if (!copy($myfile, $newfile)) {
-								$logMessage= "failed to copy $file...\n";
-								$failedpath=APPPATH  . "/logs/videoprocess/videoProcessLogFailed".date('Y-m-d').".php";
-								file_put_contents($failedpath, $logMessage. "\n", FILE_APPEND | LOCK_EX);
-							}else{
-								@unlink($dir.$file);
-								$logMessage= "process  for file ".$videofile."is success for enterprise ".$enterpreiseName."...\n";
-								$failedpath=APPPATH  . "/logs/videoprocess/videoProcessLogSuccess".date('Y-m-d').".php";
-								file_put_contents($failedpath, $logMessage. "\n", FILE_APPEND | LOCK_EX);
-							}
-						
+						}
+						if(!$flag)
+						{
+							$enterprise=explode('_',$file);
+							$enterpreiseName=@$enterprise[0];
+							$videofile=@$enterprise[1];
+							$myfile = $dir.$file;						
+							$newfile = FCPATH.'assets/enterprise/'.$enterpreiseName.'/video/'.$videofile;
+								if (!is_dir(APPPATH  . "/logs/videoprocess/"))
+								{
+									@mkdir(APPPATH  . "/logs/videoprocess",0777);
+								}
+								if (is_dir(FCPATH.'assets/enterprise/'.$enterpreiseName.'/video/')){									
+									if (!copy($myfile, $newfile)) {
+										$logMessage= "failed to copy $file...\n";
+										$failedpath=APPPATH  . "/logs/videoprocess/videoProcessLogFailed".date('Y-m-d').".php";
+										file_put_contents($failedpath, $logMessage. "\n", FILE_APPEND | LOCK_EX);
+									}else{	
+										$success++;
+										$uploadedfile.=$file.',';
+										//@unlink($dir.$file);
+										$logMessage= "process  for file ".$videofile."is success for enterprise ".$enterpreiseName."...\n";
+										$failedpath=APPPATH  . "/logs/videoprocess/videoProcessLogSuccess".date('Y-m-d').".php";
+										file_put_contents($failedpath, $logMessage. "\n", FILE_APPEND | LOCK_EX);
+									}
+								}
+						}
 					}
 				}
 			  
@@ -946,17 +968,31 @@ private function set_upload_options($filename,$ext)
 			closedir($dh);
 		  }
 		}
+		// after success move
+			if($success){
+				$movedfiles=APPPATH  . "/logs/videoprocess/processed.php";
+				if(file_exists($movedfiles))
+				{
+					$filecontent=file_get_contents($movedfiles);
+					file_put_contents($movedfiles, $uploadedfile, FILE_APPEND | LOCK_EX);
+				}else{
+					file_put_contents($movedfiles, $uploadedfile, FILE_APPEND | LOCK_EX);
+				}
+			}	
+			$this->cronDeleteMediaArtifacts(); // delete  media from folder if deleted from json
+			echo $success.' file(s) moved';
 	}
 	
 	function cronDeleteMediaArtifacts()
 	{
 		/* delete media artifacts log*/
+		$delete=0;
 		$artifactsList=FCPATH . "assets/deteled_media.txt"; // deleted artifacts log file
 		if(file_exists($artifactsList))
 		{
 			$file=file_get_contents($artifactsList);
 			if(!empty($file))
-				{
+				{ 
 					$deleteThis=explode(',',$file);
 					$newArray=array();
 					foreach($deleteThis as $key => $deleteFile)
@@ -964,7 +1000,7 @@ private function set_upload_options($filename,$ext)
 						$deletePath=FCPATH."assets/enterprise/".$deleteFile;
 						if(file_exists($deletePath))
 						{	
-							
+							$delete++;
 							@unlink($deletePath);
 							unset($deleteThis[$key]);
 						}else{
@@ -975,6 +1011,7 @@ private function set_upload_options($filename,$ext)
 					file_put_contents($artifactsList,$result);
 				}
 		}
+		echo $delete.'deleted';
 		/* delete media artifacts log*/
 	}
 	

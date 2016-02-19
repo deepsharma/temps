@@ -380,9 +380,10 @@ table.dataTable thead .sorting:after {
     font-weight: bold;
 }
 #side-menu .index-pane {
-	font-size:15px;
-	color:#97A1A8 !important;
-	font-weight:normal;
+    font-size: 15px;
+    color: #97A1A8 !important;
+    font-weight: normal;
+    margin-top: 56px;
 }
 .pad-zero{
 	padding:0px !important;
@@ -837,6 +838,9 @@ table.dataTable thead .sorting:after {
 .btn-extention{
 	right: 100px !important;
 }
+.btn-extention:focus{
+	background-color:transparent;
+}
 .center-pan h1{
 	font-size:30px;
 	color:#97A1A8;
@@ -852,6 +856,46 @@ table.dataTable thead .sorting:after {
     box-shadow: none;
     border: none;
 }
+
+.center-pan  .btn-save{
+	font-size: 15px;
+    color: #fff;
+    background-color:transparent;
+    padding: 5px 15px;
+    margin-bottom: 20px;
+    position: absolute;
+    /*top: 11px;*/
+    right: 8px;
+    border-radius: 3px;
+	border: transparent;
+}
+.center-pan  .btn-save i{
+	margin-left:5px;
+	margin-right:5px;
+}
+.center-pan .btn-save:hover{
+	color: #fff;
+    background-color: #31b0d5;    
+}
+.center-pan .smod, .center-pan .smod:hover{
+	color: #c5c5c5;
+    background-color:transparent;   
+	cursor:text; 
+}
+.center-pan  .smod i{
+	margin-left: 5px;
+    margin-right: 5px;
+    color: #fff;
+    background-color: #5cb85c;
+    /* border: 1px solid #fff; */
+    border-radius: 30px;
+    font-size: 11px;
+    padding: 3px;
+	    top: 6px;
+    position: absolute;
+    left: -10px;
+}
+
 .center-pan .page-header {
     margin: 0px 0 20px;
     padding-bottom: 5px;
@@ -1580,3 +1624,15 @@ table.dataTable thead .sorting:after {
   }
 }
 */
+
+div.tooltip-inner {
+        font-size: 12px;
+	font-weight:none;
+	max-width: 200px;
+        width: 170px; 
+	padding: 10px;
+}
+/* new class*/
+.jFiler-input-inner{
+	font-family: 'Source Sans Pro', sans-serif;
+}

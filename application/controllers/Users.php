@@ -68,7 +68,7 @@ class Users extends CI_Controller {
                );
 			 $this->session->set_userdata('logged_in', $sess_array);
 				$result['log_query']=$loginQueries;
-			$this->commonfunctions->generateLog($result,'login',APPPATH  . "/logs/log".date('Y-m-d').".php");
+			$this->commonfunctions->generateLog($result,'login',APPPATH  . "/logs/useractivity/log".date('Y-m-d').".php");
 			 return true;
 		}
 	}
@@ -92,6 +92,7 @@ class Users extends CI_Controller {
 		}
 		else
 		{
+			$logQueries='';
 			$regname = (isset($_POST['regname']) && !empty($_POST['regname']))? trim($_POST['regname']): '';
 			$regpwd = (isset($_POST['regpwd']) && !empty($_POST['regpwd']))? trim($_POST['regpwd']): '' ;
 			$compname = (isset($_POST['compname']) && !empty($_POST['compname']))? trim($_POST['compname']): '' ;
@@ -117,6 +118,7 @@ class Users extends CI_Controller {
 				   'created_on' => date('Y-m-d H:i:s')
 			   );			   
 			 $response=$this->usersmodel->saveRegistraionDetails($data);
+			 $logQueries.=$this->db->last_query()." \n ";
              $enterpriseList=FCPATH . "assets/registered_enterprise.txt"; // enterprise log file path
 				if(file_exists($enterpriseList))
 				{
@@ -142,6 +144,19 @@ class Users extends CI_Controller {
                    'enterpriseurl' => trim(strtolower($enterprise_url))
                );
 			 $this->session->set_userdata('logged_in', $sess_array);
+			 /* registration email */
+			    $data['email_to']=$regemail;
+				$data['subject']='User registration';
+				$data['username']=trim(ucfirst($regname));
+				$data['domain']=trim($compurl);
+				$data['enterprisename']=trim($compname);
+				$data['email_template_name']='registration.php';
+				$this->commonfunctions->sendmail($data);
+			 /* registration email */
+			 /* registration log*/
+				$data['log_query']=$logQueries;
+				$this->commonfunctions->generateLog($data,'register',APPPATH  . "/logs/useractivity/log".date('Y-m-d').".php");
+			 /* registration log*/
 			 redirect(base_url('dashboard'));
 			}
 		
@@ -155,6 +170,18 @@ class Users extends CI_Controller {
 		if(!empty($result))
 		{
 			$this->form_validation->set_message('checkRegistrationDetails', 'Email already in use !');
+			return false;
+		}else
+		{
+			 return true;
+		}
+	}
+	function checkValidEmail()
+	{
+		$result=$this->usersmodel->checkDuplicateEmail($_POST['email']);
+		if(empty($result))
+		{
+			$this->form_validation->set_message('checkValidEmail', 'Email address not found!');
 			return false;
 		}else
 		{
@@ -221,6 +248,85 @@ class Users extends CI_Controller {
 	{
 		$this->session->unset_userdata('logged_in');
 		redirect(base_url().'users/login');
+	}
+	
+	function forgotPassword()
+	{
+		
+		$this->form_validation->set_rules('email', 'email', 'required|valid_email|callback_checkValidEmail');				
+		if ($this->form_validation->run() == FALSE)
+		{
+			
+		}else
+		{
+			if(!empty($_POST)){
+			
+			$data['email']=$_POST['email'];
+			$data['token']=$this->usersmodel->Token();
+			$this->usersmodel->create_new_password_token($data);
+			/* reset password email */
+			$data['email_to']=$data['email'];
+			$validUser=$this->usersmodel->getUserDetaillsByEmail($data['email']);
+			if(!empty($validUser))
+			{
+				$data['subject']='Reset password';
+				$data['username']=$validUser['name'];
+				$data['email_template_name']='reset_password.php';				
+				$this->commonfunctions->sendmail($data);
+				$this->session->set_flashdata('flashData', '<div class="alert alert-success">Password Reset link has been sent to your mail!</div>');
+				redirect(base_url().'users/login');	
+			}else{
+				$this->session->set_flashdata('flashData', '<div class="alert alert-danger">Email address not found!</div>');
+				redirect(base_url().'users/login');	
+			}
+			
+			/* reset password email */
+			
+			}
+		}
+		$data['pagename']='Forgot Password';
+		$this->layout->view('users/forgot_password',$data);
+		
+	}
+	
+	function resetPassword($token='',$email='')
+	{
+		if(empty($token) || empty($email)){ show_404(); }
+		$valid=$this->usersmodel->check_valid_resetLink($token,base64_decode($email));
+		if($valid)
+		{
+			$changed=$this->usersmodel->resetPassword($token,base64_decode($email));
+			if($changed)
+			{
+				if(!empty($_POST['password']))
+				{
+					$this->form_validation->set_rules('password', 'Password', 'required|min_length[5]');
+					$this->form_validation->set_rules('pwd_confirm', 'Confirm Password', 'required|min_length[5]|matches[password]');					
+					if ($this->form_validation->run() == FALSE)
+					{
+						
+					}else
+					{
+						$this->usersmodel->change_password(base64_decode($_POST['email']),$_POST['password']);
+						$this->usersmodel->updateToken($_POST['token'],base64_decode($_POST['email']));
+						$this->session->set_flashdata('flashData', '<div class="alert alert-success">Password Successfully changed!</div>');
+						redirect(base_url().'users/login');
+					}
+				}
+				$data['pagename']='Change Password';
+				$data['token']=$token;
+				$data['email']=$email;
+				$this->layout->view('users/change_password',$data);
+				// allow file to be displayed
+			}else{
+				die('Link already used or expired');
+			}
+			
+		}else{
+			die('Invalid or link expired');
+		}
+		
+		
 	}
 	
 	

@@ -32,7 +32,13 @@ $(document).ready(function(){
 				$(this).closest('.tag-wrapper').find('.all-tags').val(pretags+","+tag);
 				$(this).val("");
 			}else{
-				alert("This tag is already added.");
+				//alert("This tag is already added.");
+				swal({
+					title: "",
+					text: 'This tag is already added.',
+					closeOnConfirm: false,
+					animation: "slide-from-top"
+				});
 			}
 		}
 	});
@@ -63,89 +69,146 @@ $(document).ready(function(){
 		var moduleId = $('#moduleId').val();
 		if(typeof(moduleId) !== "undefined"){
 			var moduleTitle = $('#moduleTitle').val();
-			if (confirm("Are you sure that you want to delete this Module?") == true) {
+			swal({
+				title: "",
+				text: "Are you sure that you want to delete this Module?",
+				type: "warning",
+				showCancelButton: true,
+				confirmButtonColor: '#DD6B55',
+				confirmButtonText: 'Yes',
+				cancelButtonText: "No",
+				animation: "slide-from-top"
+			},
+			function(isConfirm){
+				if (isConfirm) {
+					$.ajax({
+						url: web_baseURL+"enterprise/course",
+						type: 'POST',
+						data: {"action":"delete_module","module_id":moduleId},
+						success: function (result) {
+							//alert("Successfully Deleted!");
+							location.reload();
+						},
+						error:function(error){
+							console.log(error);
+						}
+					});
+				}
+			});
+		}
+	});
+	
+	// function to remove any element
+	$(document).on('click', ".remove-me" , function(e) {
+		$this = $(this);
+		swal({
+			title: "",
+			text: "Are you sure that you want to delete this Sub-module?",
+			type: "warning",
+			showCancelButton: true,
+			confirmButtonColor: '#DD6B55',
+			confirmButtonText: 'Yes',
+			cancelButtonText: "No",
+			animation: "slide-from-top"
+		},
+		function(isConfirm){
+			if (isConfirm) {
+				console.log("remove submodule");
+				$this.closest('.panel').remove();
+				// remove it from side bar
+				var mid = $('#moduleTitle').attr('data-module');
+				var sbid = $this.attr('data-submodule');
+				$('#moduleSubHead-'+mid+'-'+sbid).remove();
+			}
+		});
+	});
+	
+	// function to remove artifact
+	$(document).on('click', ".remove-media" , function(e) {
+		$this = $(this);
+		swal({
+			title: "",
+			text: "Are you sure that you want to remove this file?",
+			type: "warning",
+			showCancelButton: true,
+			confirmButtonColor: '#DD6B55',
+			confirmButtonText: 'Yes',
+			cancelButtonText: "No",
+			animation: "slide-from-top"
+		},
+		function(isConfirm){
+			if (isConfirm) {
+				var containerType = $this.closest('.thumbnail').attr("data-type");
+				var string = "";
+				if(containerType == "video"){
+					string = '<i class="fa fa-file-video-o"></i>';
+					$this.closest('.panel').find("input[id^='subModuleVideo']").val("");
+				}
+				else{
+					string = '<i class="fa fa-file-pdf-o"></i>';
+					$this.closest('.panel').find("input[id^='subModulePdf']").val("");
+				}
+				$this.closest('.thumbnail').html(string);
+			}
+		});
+	});
+	
+	// function to delete artifact
+	$(document).on('click', ".delete-media" , function(e) {
+		$this = $(this);
+		swal({
+			title: "",
+			text: "Are you sure that you want to delete this file?",
+			type: "warning",
+			showCancelButton: true,
+			confirmButtonColor: '#DD6B55',
+			confirmButtonText: 'Yes',
+			cancelButtonText: "No",
+			animation: "slide-from-top"
+		},
+		function(isConfirm){
+			if (isConfirm) {
+				$('#loader').show();
+				var artifactId = $this.attr('data-artifact');
 				$.ajax({
-					url: web_baseURL+"enterprise/course",
+					url: web_baseURL+"enterprise/artifacts",
 					type: 'POST',
-					data: {"action":"delete_module","module_id":moduleId},
+					data: {"action":"delete","media_id":artifactId},
 					success: function (result) {
-						//alert("Successfully Deleted!");
-						location.reload();
+						result = JSON.parse(result);
+						if(result.response.status == "1"){
+							// remove current item
+							$this.closest('.media-elm').remove();
+							// remove added items in current course 
+							$.each($(".drag-placeholder span"), function( index, value ) {
+								$container = $(this).parent(".drag-placeholder");
+								if($(this).attr("data-artifact") == artifactId){
+									$(this).remove;
+									if($(this).attr("data-type") == "video"){
+										$container.html('<i class="fa fa-file-video-o"></i>');
+									}else if($(this).attr("data-type") == "pdf"){
+										$container.html('<i class="fa fa-file-pdf-o"></i>');
+									}
+								}
+							});
+							$('#loader').hide();
+						}
+						else{
+							//alert("Something went wrong! Please try again.");
+							swal({
+								title: "",
+								text: 'Something went wrong! Please try again.',
+								closeOnConfirm: false,
+								animation: "slide-from-top"
+							});
+						}
 					},
 					error:function(error){
 						console.log(error);
 					}
 				});
 			}
-		}
-	});
-	
-	// function to remove any element
-	$(document).on('click', ".remove-me" , function(e) {
-		if (confirm("Are you sure that you want to delete this Sub-module?") == true) {	
-			$(this).closest('.panel').remove();
-			// remove it from side bar
-			var mid = $('#moduleTitle').attr('data-module');
-			var sbid = $(this).attr('data-submodule');
-			$('#moduleSubHead-'+mid+'-'+sbid).remove();
-		}
-	});
-	
-	// function to remove artifact
-	$(document).on('click', ".remove-media" , function(e) {
-		if (confirm("Are you sure that you want to remove this file?") == true) {
-			var containerType = $(this).closest('.thumbnail').attr("data-type");
-			var string = "";
-			if(containerType == "video"){
-				string = '<i class="fa fa-file-video-o"></i>';
-				$(this).closest('.panel').find("input[id^='subModuleVideo']").val("");
-			}
-			else{
-				string = '<i class="fa fa-file-pdf-o"></i>';
-				$(this).closest('.panel').find("input[id^='subModulePdf']").val("");
-			}
-			$(this).closest('.thumbnail').html(string);
-		}
-	});
-	
-	// function to delete artifact
-	$(document).on('click', ".delete-media" , function(e) {
-		if (confirm("Are you sure that you want to delete this file?") == true) {
-			$('#loader').show();
-			var artifactId = $(this).attr('data-artifact');
-			$this = $(this);
-			$.ajax({
-				url: web_baseURL+"enterprise/artifacts",
-				type: 'POST',
-				data: {"action":"delete","media_id":artifactId},
-				success: function (result) {
-					result = JSON.parse(result);
-					if(result.response.status == "1"){
-						// remove current item
-						$this.closest('.media-elm').remove();
-						// remove added items in current course 
-						$.each($(".item-added"), function( index, value ) {
-							$container = $(this).parent(".drag-placeholder");
-							if($(this).attr("data-artifact") == artifactId){
-								$(this).remove;
-								if($(this).attr("data-type") == "video"){
-									$container.html('<i class="fa fa-file-video-o"></i>');
-								}else if($(this).attr("data-type") == "pdf"){
-									$container.html('<i class="fa fa-file-pdf-o"></i>');
-								}
-							}
-						});
-						$('#loader').hide();
-					}
-					else{
-						alert("Something went wrong! Please try again.");
-					}
-				},
-				error:function(error){
-					console.log(error);
-				}
-			});
-		}
+		});
 	});
 	
 	// click event on upload button
@@ -245,12 +308,13 @@ $(document).ready(function(){
 					success: function (result) {
 						result = JSON.parse(result);
 						moduleId = result.response.data[0].id;
-						
-						// add to side bar
+						// side bar animation
 						$('#no-module').hide();
 						$('#side-menu li').removeClass("active");
-						$('#side-menu').append('<li class="active"><a href="javascript:void(0);" class="loadModule" id="moduleHead-'+m_count+'" data-js-module="'+m_count+'" data-module="'+moduleId+'"><i class="fa fa-folder-open fa-fw"></i><span class="_first">Untitled Module</span><span class="fa arrow"></span></a>\
-						<ul id="moduleUL-'+m_count+'" class="nav nav-second-level" data-new_mod="NEW" >\
+						$('.nav-second-level').collapse('hide').removeClass('in').attr("aria-expanded","false").removeAttr('style');
+						// add to side bar
+						$('#side-menu').append('<li class="active"><a href="javascript:void(0);" class="loadModule" id="moduleHead-'+m_count+'" data-js-module="'+m_count+'" data-module="'+moduleId+'"><i class="fa fa-folder-open fa-fw"></i> <span class="_first">Untitled Module</span><span class="fa arrow"></span></a>\
+						<ul id="moduleUL-'+m_count+'" class="nav nav-second-level collapse in" aria-expanded="true" data-new-mod="new">\
 						</ul>\
 						</li>');
 						$('#moduleHead-'+m_count).focus();
@@ -291,7 +355,8 @@ $(document).ready(function(){
 						  <button type="button" class="btn btn-outline btn-default add-sub-mod"><i class="fa fa-plus-circle"></i> Add new sub module</button>\
 						  <div class="seprator-dashed">\
 						  </div>\
-						  <button id="save-progress" class="btn btn-primary btn-lg btn-save" type="submit">Save</button>\
+						  <button id="save-progress" class="btn btn-primary btn-lg btn-save" type="submit"><i class="fa fa-save"></i> Save Module</button>\
+						  <button id="saved" class="btn btn-primary btn-lg  btn-save smod" type="submit" style="display: none;"><i class="fa fa-check"></i> Module Saved</button>\
 						</div>\
 						<!-- /.panel-body -->');
 						$('#loader').hide();
@@ -310,7 +375,7 @@ $(document).ready(function(){
 		var count = $("#subModuleCount").val(); // var for count no. of submodule
 		// add to side bar
 		var mid = $('#moduleTitle').attr('data-module');
-		$('#moduleUL-'+mid).append('<li><a href="#" id="moduleSubHead-'+mid+'-'+count+'"><i class="fa fa-file-text"></i><span class="_first">Untitled Sub Module</span></a> </li>');
+		$('#moduleUL-'+mid).append('<li><a href="javascript:void(0);" id="moduleSubHead-'+mid+'-'+count+'"><i class="fa fa-file-text"></i> <span class="_first">Untitled Sub Module</span></a> </li>');
 		
 		// add to main creator
 		$("#accordion").append('<div class="panel panel-default" data-module="'+count+'">\
@@ -402,34 +467,6 @@ $(document).ready(function(){
 		saveClick = true;
 		$saveProgress();
 	});
-	 // function to  collapse menu
-	$(document).on('click', "#side-menu li" , function(e) {
-		
-		var clickedId=$(this).find('ul').first().attr('id');
-		var isNewMod=$("#"+clickedId).attr("data-new_mod");
-		if(isNewMod=='NEW')
-		{	
-			var val=$("#"+clickedId).attr("aria-expanded");
-			 if(val=='true'){
-				$("#"+clickedId).collapse('hide');
-				$("#"+clickedId).removeClass('in');
-				$("#"+clickedId).attr("aria-expanded","false");
-				$("#"+clickedId).removeAttr('style');
-				
-			 }else{
-				
-				$("#"+clickedId).addClass('collapse in');
-				$("#"+clickedId).attr("aria-expanded","true");
-				$("#"+clickedId).removeAttr('style');
-				$("#"+clickedId).parent().siblings().find('ul').collapse('hide');				
-				$("#"+clickedId).parent().siblings().find('ul').removeClass('in');			
-				$("#"+clickedId).parent().siblings().find('ul').removeAttr('style');		
-				$("#"+clickedId).parent().siblings().find('ul').attr("aria-expanded","false");
-			 }
-		
-		}
-		
-	});
 	
 	// function to validate tags
 	$(document).on('keyup', '.add-tag' , function(e) {
@@ -473,189 +510,206 @@ $(document).ready(function(){
 	});
 	
 	// function load module by clicking side bar
+	var loadModule = true;
 	$(document).on('click', ".loadModule" , function(e) {
-		
-		
-		$('#side-menu li').removeClass("active");
-		$(this).closest('li').addClass("active");
-		//save current module progress
-		var x = $saveProgress();
-		if(x == true){
-			$('#loader').show();
-			var moduleId = $(this).attr("data-module");
-			var m_count = $(this).attr("data-js-module");
-			if(moduleId != ""){
-				// load data from server
-				$.ajax({
-					url: web_baseURL+"enterprise/course",
-					type: 'POST',
-					data: {"action":"get_module","module_id":moduleId},
-					success: function (result) {
-						result = JSON.parse(result);
-						//console.log(result);
-						if(result.response.status == "1"){
-							//add to main creator
-							moduleTitle = result.response.detail.title;
-							moduleDescription = result.response.detail.description;
-							moduleTag = result.response.detail.tags;
-							subModules = result.response.detail.courses;
-							subModuleCount = subModules.length;
-							string = '<div id="add-new-module" class="panel-body center-pan">\
-							  <div class="row pad-zero">\
-								<div class="page-header">\
-									<input type="text" class="form-control" data-module="'+m_count+'" id="moduleTitle" value="'+moduleTitle+'" placeholder="Untitled Module">\
-									<input type="hidden" value="'+moduleId+'" id="moduleId">\
-									<input type="hidden" value="'+subModuleCount+'" id="subModuleCount">\
-								</div>\
-							  </div>\
-							  <div class="row mod-tag-description">\
-								<div class="form-inline">\
-								  <div class="form-group">\
-									<label for="moduleDescription">Description</label>\
-									<input type="text" class="form-control" id="moduleDescription" value="'+moduleDescription+'" placeholder="Enter Module Description">\
+		if(loadModule){
+			loadModule = false;
+			// sidebar animation
+			$('#side-menu li').removeClass("active");
+			$(this).closest('li').addClass("active");
+			$('.nav-second-level').collapse('hide').removeClass('in').attr("aria-expanded","false").removeAttr('style');
+			var clickedId=$(this).closest('li').find('ul').first().attr('id');
+			var isNewMod=$("#"+clickedId).attr("data-new-mod");
+			if(isNewMod=='new')
+			{	
+				var val=$("#"+clickedId).attr("aria-expanded");
+				 if(val=='true'){
+					$("#"+clickedId).collapse('hide').removeClass('in').attr("aria-expanded","false").removeAttr('style');
+				 }else{
+					$("#"+clickedId).addClass('collapse in').attr("aria-expanded","true").removeAttr('style');
+					$("#"+clickedId).parent().siblings().find('ul').collapse('hide').removeClass('in').removeAttr('style').attr("aria-expanded","false");
+				 }
+			}
+			//save current module progress
+			var x = $saveProgress();
+			if(x == true){
+				$('#loader').show();
+				var moduleId = $(this).attr("data-module");
+				var m_count = $(this).attr("data-js-module");
+				if(moduleId != ""){
+					// load data from server
+					$.ajax({
+						url: web_baseURL+"enterprise/course",
+						type: 'POST',
+						data: {"action":"get_module","module_id":moduleId},
+						success: function (result) {
+							loadModule = true;
+							result = JSON.parse(result);
+							//console.log(result);
+							if(result.response.status == "1"){
+								//add to main creator
+								moduleTitle = result.response.detail.title;
+								moduleDescription = result.response.detail.description;
+								moduleTag = result.response.detail.tags;
+								subModules = result.response.detail.courses;
+								subModuleCount = subModules.length;
+								string = '<div id="add-new-module" class="panel-body center-pan">\
+								  <div class="row pad-zero">\
+									<div class="page-header">\
+										<input type="text" class="form-control" data-module="'+m_count+'" id="moduleTitle" value="'+moduleTitle+'" placeholder="Untitled Module">\
+										<input type="hidden" value="'+moduleId+'" id="moduleId">\
+										<input type="hidden" value="'+subModuleCount+'" id="subModuleCount">\
+									</div>\
 								  </div>\
-								</div>\
-							  </div>\
-							  <div class="row mod-tag-description tag-wrapper" style="display:none;">\
-								<div class="form-inline">\
-								  <div class="form-group">\
-									<label for="moduleTag">Tag</label>\
-									<input type="text" class="form-control add-tag" placeholder="Enter Module Tag">\
-									<input type="hidden" value="'+moduleTag+'" id="moduleTag" class="form-control all-tags">\
+								  <div class="row mod-tag-description">\
+									<div class="form-inline">\
+									  <div class="form-group">\
+										<label for="moduleDescription">Description</label>\
+										<input type="text" class="form-control" id="moduleDescription" value="'+moduleDescription+'" placeholder="Enter Module Description">\
+									  </div>\
+									</div>\
 								  </div>\
-								  <div class="tag tag-container">';
-							// get all module tags
-							moduleTag = moduleTag.replace(/^,|,$/g,'');
-							var res = moduleTag.split(",");
-							for(j=0; j< res.length; j++){
-								if(res[j] != ""){
-									string += '<span>'+res[j]+'<a href="#" class="remove-tag"><i class="fa fa-close"></i></a></span>';
+								  <div class="row mod-tag-description tag-wrapper" style="display:none;">\
+									<div class="form-inline">\
+									  <div class="form-group">\
+										<label for="moduleTag">Tag</label>\
+										<input type="text" class="form-control add-tag" placeholder="Enter Module Tag">\
+										<input type="hidden" value="'+moduleTag+'" id="moduleTag" class="form-control all-tags">\
+									  </div>\
+									  <div class="tag tag-container">';
+								// get all module tags
+								moduleTag = moduleTag.replace(/^,|,$/g,'');
+								var res = moduleTag.split(",");
+								for(j=0; j< res.length; j++){
+									if(res[j] != ""){
+										string += '<span>'+res[j]+'<a href="#" class="remove-tag"><i class="fa fa-close"></i></a></span>';
+									}
 								}
-							}
-							
-							string += '</div>\
-								</div>\
-							  </div>\
-							  <div class="seprator-dashed"></div>\
-							  <!-- subModule container -->\
-							  <div class="panel-group" id="accordion">\
-							  ';
-							  
-							for(var i = 0; i < subModuleCount; i++){
-							//load sub module
-							subModuleId = subModules[i].course.id;
-							subModuleTitle = subModules[i].course.title;
-							subModuleDescription = subModules[i].course.description;
-							subModuleTag = subModules[i].course.tags;
-							subModuleVideo = subModules[i].course.artifacts.video;
-							subModulePdf = subModules[i].course.artifacts.pdf;
-							string += '<div class="panel panel-default" data-module="'+i+'">\
-								<div class="panel-heading row pad-zero">\
-									<div class="sub-mod-title col-md-10">\
-										<input type="text" class="form-control panel-title" data-submodule="'+i+'" id="subModuleTitle-'+i+'" value="'+subModuleTitle+'" placeholder="Untitled Sub module">\
+								
+								string += '</div>\
 									</div>\
-									<div class="col-md-2 text-right">\
-										<button type="button" class="btn btn-info btn-circle collapsed" data-toggle="collapse" data-parent="#accordion" href="#collapseOne-'+i+'" aria-expanded="false"><i class="fa fa-chevron-down"></i></button>\
-										<button type="button" class="remove-me btn btn-danger btn-circle" data-submodule="'+i+'"><i class="fa fa-times"></i></button>\
+								  </div>\
+								  <div class="seprator-dashed"></div>\
+								  <!-- subModule container -->\
+								  <div class="panel-group" id="accordion">\
+								  ';
+								  
+								for(var i = 0; i < subModuleCount; i++){
+								//load sub module
+								subModuleId = subModules[i].course.id;
+								subModuleTitle = subModules[i].course.title;
+								subModuleDescription = subModules[i].course.description;
+								subModuleTag = subModules[i].course.tags;
+								subModuleVideo = subModules[i].course.artifacts.video;
+								subModulePdf = subModules[i].course.artifacts.pdf;
+								string += '<div class="panel panel-default" data-module="'+i+'">\
+									<div class="panel-heading row pad-zero">\
+										<div class="sub-mod-title col-md-10">\
+											<input type="text" class="form-control panel-title" data-submodule="'+i+'" id="subModuleTitle-'+i+'" value="'+subModuleTitle+'" placeholder="Untitled Sub module">\
+										</div>\
+										<div class="col-md-2 text-right">\
+											<button type="button" class="btn btn-info btn-circle collapsed" data-toggle="collapse" data-parent="#accordion" href="#collapseOne-'+i+'" aria-expanded="false"><i class="fa fa-chevron-down"></i></button>\
+											<button type="button" class="remove-me btn btn-danger btn-circle" data-submodule="'+i+'"><i class="fa fa-times"></i></button>\
+										</div>\
 									</div>\
-								</div>\
-								<div id="collapseOne-'+i+'" class="panel-collapse collapse" aria-expanded="false" style="height: 0px;">\
-									<div class="panel-body">\
-										<div class="row mod-tag-description">\
-											<div class="form-inline">\
-											  <div class="form-group">\
-												<label for="subModuleDescription-'+i+'">Description</label>\
-												<input type="text" class="form-control" id="subModuleDescription-'+i+'" value="'+subModuleDescription+'" placeholder="Enter Sub Module Description">\
+									<div id="collapseOne-'+i+'" class="panel-collapse collapse" aria-expanded="false" style="height: 0px;">\
+										<div class="panel-body">\
+											<div class="row mod-tag-description">\
+												<div class="form-inline">\
+												  <div class="form-group">\
+													<label for="subModuleDescription-'+i+'">Description</label>\
+													<input type="text" class="form-control" id="subModuleDescription-'+i+'" value="'+subModuleDescription+'" placeholder="Enter Sub Module Description">\
+												  </div>\
+												</div>\
 											  </div>\
-											</div>\
-										  </div>\
-										<div class="row mod-tag-description tag-wrapper">\
-											<div class="form-inline">\
-											  <div class="form-group">\
-												<label for="subModuleTag-'+i+'">Tag</label>\
-												<input type="text" class="form-control add-tag" placeholder="Enter Sub Module Tag">\
-												<input type="hidden" value="'+subModuleTag+'" id="subModuleTag-'+i+'" class="form-control all-tags">\
-											  </div>\
-											  <div class="tag tag-container">';
-										
-										// get all module tags
-										
-										subModuleTag = subModuleTag.replace(/^,|,$/g,'');
-										var res = subModuleTag.split(",");
-										for(j=0; j< res.length; j++){
-											if(res[j] != ""){
-												string += '<span>'+res[j]+'<a href="#" class="remove-tag"><i class="fa fa-close"></i></a></span>';
+											<div class="row mod-tag-description tag-wrapper">\
+												<div class="form-inline">\
+												  <div class="form-group">\
+													<label for="subModuleTag-'+i+'">Tag</label>\
+													<input type="text" class="form-control add-tag" placeholder="Enter Sub Module Tag">\
+													<input type="hidden" value="'+subModuleTag+'" id="subModuleTag-'+i+'" class="form-control all-tags">\
+												  </div>\
+												  <div class="tag tag-container">';
+											
+											// get all module tags
+											
+											subModuleTag = subModuleTag.replace(/^,|,$/g,'');
+											var res = subModuleTag.split(",");
+											for(j=0; j< res.length; j++){
+												if(res[j] != ""){
+													string += '<span>'+res[j]+'<a href="#" class="remove-tag"><i class="fa fa-close"></i></a></span>';
+												}
 											}
-										}
-										
+											
+											string += '</div>\
+												</div>\
+											  </div>\
+											  <div class="seprator-dashed"></div>\
+											  <div class="row mod-tag-description">\
+												<div class="form-inline">\
+												  <label for="subModuleArtifacts-'+i+'" class="col-md-2 pad-zero">Media</label>\
+												  <div class="col-md-10">';
+												  
+												if(subModuleVideo != ""){  
+													string += '<div class="thumbnail drag-placeholder gallery" data-type="video">\
+													<button type="button" class="remove-media btn btn-danger btn-circle"><i class="fa fa-times"></i></button>\
+													<span class="item-added" data-type="pdf" data-artifact="'+subModuleVideo+'">\
+													<img src="'+baseImage+'mp4.png"></span>\
+													</div>';
+												}
+												else{
+													string += '<div class="thumbnail drag-placeholder gallery" data-type="video"> <i class="fa fa-file-video-o"></i></div>';
+												}
+												if(subModulePdf != ""){
+													string += '<div class="thumbnail drag-placeholder gallery" data-type="pdf">\
+													<button type="button" class="remove-media btn btn-danger btn-circle"><i class="fa fa-times"></i></button>\
+													<span class="item-added" data-type="pdf" data-artifact="'+subModulePdf+'">\
+													<img src="'+baseImage+'pdf.png"></span>\
+													</div>';
+												}
+												else{
+													string += '<div class="thumbnail drag-placeholder gallery" data-type="pdf"> <i class="fa fa-file-pdf-o"></i></div>';
+												}
+													
 										string += '</div>\
-											</div>\
-										  </div>\
-										  <div class="seprator-dashed"></div>\
-										  <div class="row mod-tag-description">\
-											<div class="form-inline">\
-											  <label for="subModuleArtifacts-'+i+'" class="col-md-2 pad-zero">Media</label>\
-											  <div class="col-md-10">';
-											  
-											if(subModuleVideo != ""){  
-												string += '<div class="thumbnail drag-placeholder gallery" data-type="video">\
-												<button type="button" class="remove-media btn btn-danger btn-circle"><i class="fa fa-times"></i></button>\
-												<span class="item-added" data-type="pdf" data-artifact="'+subModuleVideo+'">\
-												<img src="'+baseImage+'mp4.png"></span>\
-												</div>';
-											}
-											else{
-												string += '<div class="thumbnail drag-placeholder gallery" data-type="video"> <i class="fa fa-file-video-o"></i></div>';
-											}
-											if(subModulePdf != ""){
-												string += '<div class="thumbnail drag-placeholder gallery" data-type="pdf">\
-												<button type="button" class="remove-media btn btn-danger btn-circle"><i class="fa fa-times"></i></button>\
-												<span class="item-added" data-type="pdf" data-artifact="'+subModulePdf+'">\
-												<img src="'+baseImage+'pdf.png"></span>\
-												</div>';
-											}
-											else{
-												string += '<div class="thumbnail drag-placeholder gallery" data-type="pdf"> <i class="fa fa-file-pdf-o"></i></div>';
-											}
-												
-									string += '</div>\
-											  <input type="hidden" value="'+subModuleVideo+'" name="video-'+i+'" id="subModuleVideo-'+i+'">\
-											  <input type="hidden" value="'+subModulePdf+'" name="pdf-'+i+'" id="subModulePdf-'+i+'">\
-											</div>\
-										  </div>\
+												  <input type="hidden" value="'+subModuleVideo+'" name="video-'+i+'" id="subModuleVideo-'+i+'">\
+												  <input type="hidden" value="'+subModulePdf+'" name="pdf-'+i+'" id="subModulePdf-'+i+'">\
+												</div>\
+											  </div>\
+										</div>\
+										<div class="panel-footer text-center"><i class="fa fa-object-ungroup"></i> Drop files from the Media Pane to attach them to this lesson</div>\
 									</div>\
-									<div class="panel-footer text-center"><i class="fa fa-object-ungroup"></i> Drop files from the Media Pane to attach them to this lesson</div>\
-								</div>\
-							</div>';
-							}
-							// submodule closed
-							string += '</div>\
-							  <!-- subModule container closed -->\
-							  <button type="button" class="btn btn-outline btn-default add-sub-mod"><i class="fa fa-plus-circle"></i> Add new sub module</button>\
-							  <div class="seprator-dashed">\
-							  </div>\
-							  <button id="save-progress" class="btn btn-primary btn-lg btn-save" type="submit"><i class="fa fa-save"></i>Save Module</button>\
-							  <button id="saved" class="btn btn-primary btn-lg  btn-save smod" type="submit"><i class="fa fa-check"></i>Module Saved</button>\
-							</div>\
-							<!-- /.panel-body -->';
-							
-							$('#main-container').html(string);
-							
-							//make droppable to dynamically added gallery items 
-							$('.gallery').droppable({
-								accept: "#mediaContainer .item",
-								activeClass: "ui-state-highlight",
-								drop: function( event, ui ) {
-									dropNow( event, ui, this);
+								</div>';
 								}
-							});
-							$('#loader').hide();
+								// submodule closed
+								string += '</div>\
+								  <!-- subModule container closed -->\
+								  <button type="button" class="btn btn-outline btn-default add-sub-mod"><i class="fa fa-plus-circle"></i> Add new sub module</button>\
+								  <div class="seprator-dashed">\
+								  </div>\
+								  <button id="save-progress" class="btn btn-primary btn-lg btn-save" type="submit"><i class="fa fa-save"></i> Save Module</button>\
+								  <button id="saved" class="btn btn-primary btn-lg  btn-save smod" type="submit"><i class="fa fa-check"></i> Module Saved</button>\
+								</div>\
+								<!-- /.panel-body -->';
+								
+								$('#main-container').html(string);
+								
+								//make droppable to dynamically added gallery items 
+								$('.gallery').droppable({
+									accept: "#mediaContainer .item",
+									activeClass: "ui-state-highlight",
+									drop: function( event, ui ) {
+										dropNow( event, ui, this);
+									}
+								});
+								$('#loader').hide();
+							}
+						},
+						error:function(error){
+							console.log(error);
 						}
-					},
-					error:function(error){
-						console.log(error);
-					}
-				});
+					});
+				}
 			}
 		}
 	});
@@ -864,7 +918,13 @@ function $saveProgress(){
 		});
 	}else{
 		$('#loader').hide()
-		alert("Please add a module title before proceeding.");
+		//alert("Please add a module title before proceeding.");
+		swal({
+			title: "",
+			text: 'Please add a module title before proceeding.',
+			closeOnConfirm: false,
+			animation: "slide-from-top"
+		});
 	}
 	return succeed;
 }
@@ -955,12 +1015,24 @@ function dropNow( event, ui, $this){
 	var removebtn = '<button type="button" class="remove-media btn btn-danger btn-circle"><i class="fa fa-times"></i></button>';
 	if(dataContainer == "video" && dataType == "video"){
 		if(subModuleVideo != ""){
-			if (confirm("Do you want to overwrite the existing video file?") == true) {
-				$('#subModuleVideo-'+current).val(dataArtifact);
-				$($this).html("");
-				$($this).append(removebtn);
-				$($this).append($item);
-			}
+			swal({
+				title: "",
+				text: "Do you want to overwrite the existing video file?",
+				type: "warning",
+				showCancelButton: true,
+				confirmButtonColor: '#DD6B55',
+				confirmButtonText: 'Yes',
+				cancelButtonText: "No",
+				animation: "slide-from-top"
+			},
+			function(isConfirm){
+				if (isConfirm) {
+					$('#subModuleVideo-'+current).val(dataArtifact);
+					$($this).html("");
+					$($this).append(removebtn);
+					$($this).append($item);
+				}
+			});
 		}else{
 			$('#subModuleVideo-'+current).val(dataArtifact);
 			$($this).html("");
@@ -969,12 +1041,24 @@ function dropNow( event, ui, $this){
 		}
 	}else if(dataContainer == "pdf" && dataType == "pdf"){
 		if(subModulePdf != ""){
-			if (confirm("Do you want to overwrite the existing pdf file?") == true) {
-				$('#subModulePdf-'+current).val(dataArtifact);
-				$($this).html("");
-				$($this).append(removebtn);
-				$($this).append($item);
-			}
+			swal({
+				title: "",
+				text: "Do you want to overwrite the existing pdf file?",
+				type: "warning",
+				showCancelButton: true,
+				confirmButtonColor: '#DD6B55',
+				confirmButtonText: 'Yes',
+				cancelButtonText: "No",
+				animation: "slide-from-top"
+			},
+			function(isConfirm){
+				if (isConfirm) {
+					$('#subModulePdf-'+current).val(dataArtifact);
+					$($this).html("");
+					$($this).append(removebtn);
+					$($this).append($item);
+				}
+			});
 		}else{
 			$('#subModulePdf-'+current).val(dataArtifact);
 			$($this).html("");
@@ -982,7 +1066,13 @@ function dropNow( event, ui, $this){
 			$($this).append($item);
 		}
 	}else{
-		alert("Please drag "+dataContainer+" file only.");
+		//alert("Please drag "+dataContainer+" file only.");
+		swal({
+			title: "",
+			text: 'Please drag '+dataContainer+' file only.',
+			closeOnConfirm: false,
+			animation: "slide-from-top"
+		});
 	}
 }
 
@@ -991,3 +1081,39 @@ function validateInput(txt) {
     var re = /^[a-zA-Z0-9\-\_\ ]+$/;
     return re.test(txt);
 }
+
+var processed = true;
+setInterval(function(){
+	$.each($(".media-elm span"), function( index, value ) {
+		processItem = $(this).attr("data-process");
+		if(processItem == "false"){
+			processed = false;
+		}
+	});
+	if(!processed){
+		$.ajax({
+			url: web_baseURL+"welcome/getUnprocessedMediaByAjax",
+			type: 'POST',
+			success: function (result) {
+				result = JSON.parse(result);
+				arr = result.response.detail;
+				for (i = 0; i < arr.length; i++) {
+					// for each element split by dot operator
+					$.each($(".media-elm span"), function( index, value ) {
+						currentItem = $(this).attr("data-path").split(".");
+						artifactId = $(this).attr("data-artifact");
+						currentItem = currentItem[0];
+						if(currentItem == arr[i]){
+							$(this).attr("data-process","true");
+							$(this).closest(".media-elm").find('.thumb-progress').remove();
+							$(this).closest(".media-elm").prepend('<button type="button" class="delete-media btn-delete btn btn-danger btn-circle" data-artifact="'+artifactId+'"><i class="fa fa-times"></i></button>');
+						}
+					});
+				}
+			},
+			error:function(error){
+				//console.log(error);
+			}
+		});
+	}
+},60000);
